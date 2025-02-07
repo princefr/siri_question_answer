@@ -1027,7 +1027,7 @@ dependencies = [
 
 [[package]]
 name = "siri_question_answer"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "pyo3",
  "siri_question_response",
