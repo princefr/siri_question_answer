@@ -27,9 +27,7 @@ impl EstimatedTableConsumer {
         let url = self.url.clone();
         let callback = Arc::new(callback);
 
-        std::thread::spawn(move || {
             let rt = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
-            
             rt.block_on(async move {
                 let (tx, mut rx) = unbounded_channel();
                 let line_discovery = siri_question_response::get_line_discovery(&url, "Hove").await;
@@ -98,7 +96,6 @@ impl EstimatedTableConsumer {
                 
                 let _ = tokio::join!(listener_handle, receiver_handle);
             });
-        });
 
         Ok(())
     }
