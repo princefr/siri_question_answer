@@ -44,15 +44,12 @@ impl EstimatedTableListerner {
 
                 let client = reqwest::Client::new();
                 let response = send_soap_request(&client, &url, &result).await.expect("Failed to send request");
-                let body = response.text().await.expect("Failed to get response body");
-                let vjs = crate::transformers::split_vjs::split_soap_envelopes(&body).expect("Failed to split SOAP envelopes");
-
-                for envelope in vjs {
-                    sender.send(Notification {
-                        message: envelope.replace("ns2:", ""), // Remove the ns2: prefix as it create issues with the XML parser
-                        _type: "EstimatedTable".to_string(),
-                    }).expect("Failed to send notification");
-                }
+                let xml = response.text().await.expect("Failed to get response body");
+                
+                sender.send(Notification {
+                    message: xml.replace("ns2:", ""), // Remove the ns2: prefix as it create issues with the XML parser
+                    _type: "EstimatedTable".to_string(),
+                }).expect("Failed to send notification");
             }
         })
     }
