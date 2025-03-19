@@ -2,54 +2,37 @@ use quick_xml::de::from_str;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase", rename = "Envelope")]
-pub struct Envelope {
+#[serde(rename_all = "PascalCase")]
+pub struct SoapEnvelope {
     #[serde(rename = "Header")]
-    pub header: String, 
+    pub header: String,
     #[serde(rename = "Body")]
-    pub body: Body,
+    pub body: SoapBody,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase", rename = "Body")]
-pub struct Body {
-    #[serde(rename = "LinesDiscoveryResponse")]
-    pub lines_discovery_response: LinesDiscoveryResponse,
+#[serde(rename_all = "PascalCase")]
+pub struct SoapBody {
+    pub siri: Siri,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase", rename = "LinesDiscoveryResponse")]
-pub struct LinesDiscoveryResponse {
-    #[serde(rename = "ServiceDeliveryInfo")]
-    pub service_delivery_info: ServiceDeliveryInfo,
-    #[serde(rename = "Answer")]
-    pub answer: Answer,
+#[serde(rename_all = "PascalCase")]
+pub struct Siri {
+    #[serde(rename = "LinesDelivery")]
+    pub lines_delivery: LinesDelivery,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase", rename = "ServiceDeliveryInfo")]
-pub struct ServiceDeliveryInfo {
-    #[serde(rename = "ResponseTimestamp")]
-    pub response_timestamp: String,
-    #[serde(rename = "ProducerRef")]
-    pub producer_ref: String,
-    #[serde(rename = "ResponseMessageIdentifier")]
-    pub response_message_identifier: String,
-    #[serde(rename = "RequestMessageRef")]
-    pub request_message_ref: String,
-}
-
-#[derive(Debug, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase", rename = "Answer")]
-pub struct Answer {
-    #[serde(rename = "ResponseTimestamp")]
+#[serde(rename_all = "PascalCase")]
+pub struct LinesDelivery {
     pub response_timestamp: String,
     #[serde(rename = "AnnotatedLineRef")]
     pub annotated_line_refs: Vec<AnnotatedLineRef>,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase", rename = "AnnotatedLineRef")]
+#[serde(rename_all = "PascalCase")]
 pub struct AnnotatedLineRef {
     #[serde(rename = "LineRef")]
     pub line_ref: String,
@@ -62,14 +45,14 @@ pub struct AnnotatedLineRef {
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase", rename = "Destinations")]
+#[serde(rename_all = "PascalCase")]
 pub struct Destinations {
     #[serde(rename = "Destination")]
     pub destination: Vec<Destination>,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "PascalCase", rename = "Destination")]
+#[serde(rename_all = "PascalCase")]
 pub struct Destination {
     #[serde(rename = "DestinationRef")]
     pub destination_ref: String,
@@ -77,12 +60,12 @@ pub struct Destination {
     pub direction_ref: String,
 }
 
-/// Deserialize a LinesDiscoveryResponse from XML.
+/// Deserialize a LinesDelivery response from XML.
 /// 
 /// # Parameters
 /// 
 /// - `xml` - The XML to deserialize.
-pub fn deserialize_lines_discovery_response(xml: &str) -> Result<Envelope, quick_xml::DeError> {
+pub fn deserialize_lines_delivery(xml: &str) -> Result<SoapEnvelope, quick_xml::DeError> {
     from_str(xml)
 }
 
@@ -91,67 +74,54 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_deserialize_lines_discovery_response() {
+    fn test_deserialize_lines_delivery() {
         let xml = r#"
-            <Envelope xmlns="http://www.w3.org/2003/05/soap-envelope" xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-                <soap:Header></soap:Header>
-                <Body>
-                    <LinesDiscoveryResponse>
-                        <ServiceDeliveryInfo>
-                            <ResponseTimestamp>2021-08-31T14:00:00Z</ResponseTimestamp>
-                            <ProducerRef>ProducerRef</ProducerRef>
-                            <ResponseMessageIdentifier>ResponseMessageIdentifier</ResponseMessageIdentifier>
-                            <RequestMessageRef>RequestMessageRef</RequestMessageRef>
-                        </ServiceDeliveryInfo>
-                        <Answer>
-                            <ResponseTimestamp>2021-08-31T14:00:00Z</ResponseTimestamp>
-                            <AnnotatedLineRef>
-                                <LineRef>421</LineRef>
-                                <LineName>D421</LineName>
-                                <Monitored>true</Monitored>
-                                <Destinations>
-                                    <Destination>
-                                    <DestinationRef>COLLUM1</DestinationRef>
-                                    <DirectionRef>Aller</DirectionRef>
-                                    </Destination>
-                                    <Destination>
-                                    <DestinationRef>ARGUEL02</DestinationRef>
-                                    <DirectionRef>Retour</DirectionRef>
-                                    </Destination>
-                                </Destinations>
-                            </AnnotatedLineRef>
-                            <version>version</version>
-                        </Answer>
-                    </LinesDiscoveryResponse>
-                </Body>
-            </Envelope>
+            <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope/" soap:encodingStyle="http://www.w3.org/2003/05/soap-encoding">
+              <soap:Header></soap:Header>
+              <soap:Body>
+                <Siri xmlns="http://www.siri.org.uk/siri" xmlns:ns5="http://www.opengis.net/gml/3.2" xmlns:ns2="http://www.ifopt.org.uk/acsb" xmlns:ns4="http://datex2.eu/schema/2_0RC1/2_0" xmlns:ns3="http://www.ifopt.org.uk/ifopt">
+                  <LinesDelivery version="1.0">
+                    <ResponseTimestamp>2025-03-19T12:23:28.81575356Z</ResponseTimestamp>
+                    <AnnotatedLineRef>
+                      <LineRef>101</LineRef>
+                      <LineName>T1</LineName>
+                      <Monitored>true</Monitored>
+                      <Destinations>
+                        <Destination>
+                          <DestinationRef>t_chal</DestinationRef>
+                          <DirectionRef>Aller</DirectionRef>
+                        </Destination>
+                        <Destination>
+                          <DestinationRef>t_hdc2</DestinationRef>
+                          <DirectionRef>Retour</DirectionRef>
+                        </Destination>
+                      </Destinations>
+                    </AnnotatedLineRef>
+                  </LinesDelivery>
+                </Siri>
+              </soap:Body>
+            </soap:Envelope>
         "#;
 
-        let expected = Envelope {
+        let expected = SoapEnvelope {
             header: "".to_string(),
-            body: Body {
-                lines_discovery_response: LinesDiscoveryResponse {
-                    service_delivery_info: ServiceDeliveryInfo {
-                        response_timestamp: "2021-08-31T14:00:00Z".to_string(),
-                        producer_ref: "ProducerRef".to_string(),
-                        response_message_identifier: "ResponseMessageIdentifier".to_string(),
-                        request_message_ref: "RequestMessageRef".to_string(),
-                    },
-                    answer: Answer {
-                        response_timestamp: "2021-08-31T14:00:00Z".to_string(),
+            body: SoapBody {
+                siri: Siri {
+                    lines_delivery: LinesDelivery {
+                        response_timestamp: "2025-03-19T12:23:28.81575356Z".to_string(),
                         annotated_line_refs: vec![
                             AnnotatedLineRef {
-                                line_ref: "421".to_string(),
-                                line_name: "D421".to_string(),
+                                line_ref: "101".to_string(),
+                                line_name: "T1".to_string(),
                                 monitored: true,
                                 destinations: Destinations {
                                     destination: vec![
                                         Destination {
-                                            destination_ref: "COLLUM1".to_string(),
+                                            destination_ref: "t_chal".to_string(),
                                             direction_ref: "Aller".to_string(),
                                         },
                                         Destination {
-                                            destination_ref: "ARGUEL02".to_string(),
+                                            destination_ref: "t_hdc2".to_string(),
                                             direction_ref: "Retour".to_string(),
                                         },
                                     ],
@@ -160,10 +130,10 @@ mod tests {
                         ],
                     },
                 },
-            }
+            },
         };
 
-        let result: Envelope = from_str(xml).unwrap();
+        let result: SoapEnvelope = from_str(xml).unwrap();
         assert_eq!(result, expected);
     }
 }

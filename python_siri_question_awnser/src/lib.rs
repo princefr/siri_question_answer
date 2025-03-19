@@ -48,7 +48,7 @@ impl EstimatedTableConsumer {
                     }
                 };
                 
-                let lines_deserialized = match siri_question_response::deserializers::line_discovery_ginko::deserialize_lines_discovery_response(&lines_unfiltered) {
+                let lines_deserialized = match siri_question_response::deserializers::line_discovery_ginko::deserialize_lines_delivery(&lines_unfiltered) {
                     Ok(deserialized) => deserialized,
                     Err(e) => {
                         error!("Failed to deserialize line discovery response: {:?}", e);
@@ -58,9 +58,7 @@ impl EstimatedTableConsumer {
                 
                 let lines: Vec<String> = lines_deserialized
                     .body
-                    .lines_discovery_response
-                    .answer
-                    .annotated_line_refs
+                    .siri.lines_delivery.annotated_line_refs
                     .into_iter()
                     .map(|line| line.line_ref.clone())
                     .collect();
